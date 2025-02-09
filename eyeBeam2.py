@@ -81,17 +81,19 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                 row_ids += [en[0]]
                 reply += [str(en[5])]
 
+            print(reply[0])
+
             # print(reply)
-            response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
+            #response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
             # response = ollama.embed(model='llama3.2', input=reply)
             # print(response.embeddings)
 
-            for idx,embd in enumerate(response.embeddings):
+            #for idx,embd in enumerate(response.embeddings):
                 # print(embd[0:256])
-                db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:256])],)
+                #db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:256])],)
                 # print([x for x in db.execute("SELECT * from vec_items").fetchall()])
                 # print("@@@@@@@@@@")
-
+            #    print(index)
             # print(f"success")
 
         except Exception as e:
@@ -110,7 +112,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 
 def mainProg():
     dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
-    dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
+    dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC_byteArr.db"
 
 #    try:
 #        _createTable(dbVECTOR, 100)
@@ -118,12 +120,12 @@ def mainProg():
 #        untouch(dbVECTOR,100)
 #        _createTable(dbVECTOR, 100)
 
-    hardLimiter = 10000;
+    hardLimiter = 5000;
 
     insert_kwargs = {
-        "limit": 125,
+        "limit": 50,
 #        "offset": 1650,
-        "offset": 5000,
+        "offset": 1900,
         }
 
     while insert_kwargs["offset"] < hardLimiter:
