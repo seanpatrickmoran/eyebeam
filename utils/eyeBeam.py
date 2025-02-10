@@ -81,19 +81,17 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                 row_ids += [en[0]]
                 reply += [str(en[5])]
 
-            print(reply[0])
-
             # print(reply)
-            #response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
+            response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
             # response = ollama.embed(model='llama3.2', input=reply)
             # print(response.embeddings)
 
-            #for idx,embd in enumerate(response.embeddings):
+            for idx,embd in enumerate(response.embeddings):
                 # print(embd[0:256])
-                #db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:256])],)
+                db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:256])],)
                 # print([x for x in db.execute("SELECT * from vec_items").fetchall()])
                 # print("@@@@@@@@@@")
-            #    print(index)
+
             # print(f"success")
 
         except Exception as e:
@@ -112,7 +110,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 
 def mainProg():
     dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
-    dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC_byteArr.db"
+    dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
 
 #    try:
 #        _createTable(dbVECTOR, 100)
@@ -120,19 +118,19 @@ def mainProg():
 #        untouch(dbVECTOR,100)
 #        _createTable(dbVECTOR, 100)
 
-    hardLimiter = 5000;
+    hardLimiter = 25000;
 
     insert_kwargs = {
-        "limit": 50,
+        "limit": 125,
 #        "offset": 1650,
-        "offset": 1900,
+        "offset": 20000,
         }
 
     while insert_kwargs["offset"] < hardLimiter:
         tnow = datetime.datetime.now()
         _readSOURCE_writeVECTOR(dbSOURCE, dbVECTOR, 100, **insert_kwargs)
         insert_kwargs["offset"] = insert_kwargs.get("offset", 0) + insert_kwargs.get("limit", 10)
-        print(datetime.datetime.now() - tnow)
+        print(datetime.datetime.now() - tnow, datetime.datetime.now())
         print(insert_kwargs)
         # print("written")
 
