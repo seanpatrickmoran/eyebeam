@@ -23,7 +23,10 @@ def serialize_f32(vector: List[float]) -> bytes:
     return struct.pack("%sf" % len(vector), *vector)
 
 dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
-dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
+# dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
+dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db.checkpoint_Feb10_2025.db"
+
+
 app = Flask(__name__)
  
 @app.route("/test", methods=['GET'])

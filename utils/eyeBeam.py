@@ -74,7 +74,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
             db.enable_load_extension(False)
             cursor_s.row_factory = sqlite3.Row
             # params = (name,)
-            cursor_s.execute("SELECT rowid, * FROM imag LIMIT ? OFFSET ?", (limit,offset))
+            cursor_s.execute("SELECT * FROM imag LIMIT ? OFFSET ?", (limit,offset))
             row_ids = []
             reply = []
             for en in cursor_s.fetchall():
@@ -109,21 +109,23 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 
 
 def mainProg():
-    dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
-    dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
+    dbSOURCE = "/Users/seanmoran/Documents/Master/2025/Feb2025/virt_Tables_021125/database_7_bin.db"
+    # dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
+    # dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
+    dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC_7.db"
 
-#    try:
-#        _createTable(dbVECTOR, 100)
-#    except sqlite3.OperationalError:
-#        untouch(dbVECTOR,100)
-#        _createTable(dbVECTOR, 100)
+    try:
+        _createTable(dbVECTOR, 100)
+    except sqlite3.OperationalError:
+        untouch(dbVECTOR,100)
+        _createTable(dbVECTOR, 100)
 
-    hardLimiter = 25000;
+    hardLimiter = 6;
 
     insert_kwargs = {
-        "limit": 125,
+        "limit": 6,
 #        "offset": 1650,
-        "offset": 20000,
+        "offset": 0,
         }
 
     while insert_kwargs["offset"] < hardLimiter:
