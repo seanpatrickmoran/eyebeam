@@ -64,8 +64,6 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 # def _readMatchAllTable(dbPATH,timeout,**kwargs):
     def _readDB(offset, limit):
         connection_s,cursor_s=call(dbPATH1,timeout)
-        # connection_t,cursor_t=call(dbPATH2,timeout)
-        # dbvec = sqlite3.connect(dbPATH2)
 
         try:
             db = sqlite3.connect(dbPATH2)
@@ -73,16 +71,15 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
             sqlite_vec.load(db)
             db.enable_load_extension(False)
             cursor_s.row_factory = sqlite3.Row
-            # params = (name,)
             cursor_s.execute("SELECT * FROM imag LIMIT ? OFFSET ?", (limit,offset))
+            print("..")
             row_ids = []
             reply = []
             for en in cursor_s.fetchall():
                 if len(en[5])!=16900:
-                    print(en[0])
                     continue
                 row_ids += [en[0]]
-                reply += [str(en[5])]
+                reply += [en[5]]
 
 
 
@@ -106,7 +103,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                     )
                 """
                 row_ids += [en[0]]
-                reply += [str(en[5])]
+                reply += [en[5]]
 
                 """
                 plan is change table...
@@ -134,34 +131,32 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 
                 """
 
+            # response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
 
+            print(type(reply[0]))
 
-
-            # print(reply)
-            response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
-            # response = ollama.embed(model='llama3.2', input=reply)
-            # print(response.embeddings)
-
-            for idx,embd in enumerate(response.embeddings):
+            for idx,embd in enumerate(reply):
+                # print(embd)
                 # print(embd[0:256])
-                db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:256])],)
-                print([x for x in db.execute("SELECT * from vec_items").fetchall()])
+                # unpacked_float_single = struct.unpack('>f', packed_float_single)[0]
+                db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], embd[:1024]],)
+                # print([x for x in db.execute("SELECT * from vec_items").fetchall()])
                 # print("@@@@@@@@@@")
 
-            # print(f"success")
-
+            print(f"success")
 
 
         except sqlite3.OperationalError as e:
             # the limiter overflows whatever is left.
             # just read everything left.
-            print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+
+            # print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
             # print([len(x) for x in reply])
             for x in range(len(reply)):
                 if len(reply[x])!=16900:
                     print(row_ids[x])
-                    continue    
-                # db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[x], reply[x][:1024]],)
+                    continue
+                db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[x], reply[x][:1024]],)
 
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(e).__name__, e.args)
@@ -169,8 +164,10 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
             print(e)
 
 
-
         except Exception as e:
+            template = "An exception of type {0} occurred. Arguments:\n{1!r}"
+            message = template.format(type(e).__name__, e.args)
+            print(message)
             print(e)
 
         finally:
@@ -188,26 +185,26 @@ def mainProg():
     dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_9_bin.db"
     # dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
     # dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
-    dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/EB_databaseVEC_9.db"
+    dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/false_databaseVEC_9.db"
 
     try:
-        _createTable(dbVECTOR, 10)
+        _createTable(dbVECTOR, 100)
     except sqlite3.OperationalError:
         untouch(dbVECTOR,100)
-        _createTable(dbVECTOR, 10)
+        _createTable(dbVECTOR, 100)
 
-    hardLimiter = 5000;
+    hardLimiter = 600000;
     #check length of table
 
     insert_kwargs = {
-        "limit": 8,
+        "limit": 2048,
 #        "offset": 1650,
         "offset": 0,
         }
 
     while insert_kwargs["offset"] < hardLimiter:
         tnow = datetime.datetime.now()
-        _readSOURCE_writeVECTOR(dbSOURCE, dbVECTOR, 10, **insert_kwargs)
+        _readSOURCE_writeVECTOR(dbSOURCE, dbVECTOR, 100, **insert_kwargs)
         insert_kwargs["offset"] = insert_kwargs.get("offset", 0) + insert_kwargs.get("limit", 10)
         print(datetime.datetime.now() - tnow, datetime.datetime.now())
         print(insert_kwargs)
