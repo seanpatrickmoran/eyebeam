@@ -102,8 +102,6 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                     12: meta
                     )
                 """
-                row_ids += [en[0]]
-                reply += [en[5]]
 
                 """
                 plan is change table...
@@ -139,7 +137,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                 # print(embd)
                 # print(embd[0:256])
                 # unpacked_float_single = struct.unpack('>f', packed_float_single)[0]
-                db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], embd[:1024]],)
+                db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[idx], embd[:256*4]],)
                 # print([x for x in db.execute("SELECT * from vec_items").fetchall()])
                 # print("@@@@@@@@@@")
 
@@ -156,7 +154,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                 if len(reply[x])!=16900:
                     print(row_ids[x])
                     continue
-                db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[x], reply[x][:1024]],)
+                db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[x], reply[x][:256*4]],)
 
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(e).__name__, e.args)
@@ -185,7 +183,7 @@ def mainProg():
     dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_9_bin.db"
     # dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
     # dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
-    dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/false_databaseVEC_9.db"
+    dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/psy_databaseVEC_9.db"
 
     try:
         _createTable(dbVECTOR, 100)

@@ -6,6 +6,7 @@ import sqlite_vec
 import ollama
 from typing import List
 import struct
+import array
 import datetime
 
 
@@ -49,7 +50,7 @@ def _createTable(dbPATH, timeout,**kwargs):
         sqlite_vec.load(db)
         db.enable_load_extension(False)
         # cursor = connection.execute("CREATE TABLE vec_items USING vec0(embedding float[256])")
-        db.execute("CREATE VIRTUAL TABLE vec_items USING vec0(key_id integer primary key, embedding float[256])")
+        db.execute("CREATE VIRTUAL TABLE vec_items USING vec0(key_id integer primary key, embedding float[512])")
         # cursor = connection.execute("CREATE TABLE imag(name, dataset, condition, coordinates, numpyarr, viewing_vmax, dimensions, hic_path, PUB_ID, resolution, norm, meta)")
         print("table make; success")
         # db.close()
@@ -74,17 +75,47 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
             db.enable_load_extension(False)
             cursor_s.row_factory = sqlite3.Row
             # params = (name,)
-            cursor_s.execute("SELECT * FROM imag LIMIT ? OFFSET ?", (limit,offset))
+            cursor_s.execute("SELECT key_id, hist_rel, numpyarr FROM imag LIMIT ? OFFSET ?", (limit,offset))
             row_ids = []
             reply = []
             for en in cursor_s.fetchall():
-                if len(en[5])!=16900:
-                    print(en[0])
-                    continue
+                # if len(en[1])!=16900:
+                    # print(en[0])
+                    # continue
                 row_ids += [en[0]]
-                reply += [str(en[5])]
+                # barr = en[1]
+                # print(en[1])
+                rarr = b''
+                # harr = [x for x in en[1]]
+                # print(en[3], en[4])
+                harr = array.array('I', en[1])
+                barr = array.array('f', en[2])
+
+                for el in harr:
+                    rarr += struct.pack('l', el)
+
+                for i in range(64):
+                    for j in range(64):
+                        if i+1<=j and (i+j)%8==0:
+                            rarr += struct.pack('f',barr[i+j])
+                        elif 28<i<38 and 28<j<38:
+                            rarr += struct.pack('f',barr[i+j])
+                        # elif (i+j)%8==0:
+                        #     rarr += struct.pack('f',barr[i+j])
+                reply += [str(rarr)]
+                # exit()
+
+                # for el in barr:
+                #     rarr += struct.pack('f', el)
 
 
+                # print(harr)
+                # print(barr)
+                # rarr = hex(harr) + hex(barr)
+
+                # barr += en[8]  #this works fine.
+                # barr = en[9] #relative histogram
+                # barr += en[5]
 
                 """
                 table schema:
@@ -105,8 +136,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                     12: meta
                     )
                 """
-                row_ids += [en[0]]
-                reply += [str(en[5])]
+
 
                 """
                 plan is change table...
@@ -134,18 +164,17 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 
                 """
 
-
-
-
+            # print(len(reply[0]))
+            response = ollama.embed(model='8KWin', input=reply, truncate=False, options={'num_gpus': 99})
             # print(reply)
-            response = ollama.embed(model='llama3.2', input=reply, options={'num_gpus': 99})
+            # response = ollama.embed(model='llama3.2', input=reply, truncate=False, options={'num_gpus': 99, 'ctx_num': 18096})
             # response = ollama.embed(model='llama3.2', input=reply)
             # print(response.embeddings)
 
             for idx,embd in enumerate(response.embeddings):
                 # print(embd[0:256])
-                db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:256])],)
-                print([x for x in db.execute("SELECT * from vec_items").fetchall()])
+                db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:512])],)
+                # print([x for x in db.execute("SELECT * from vec_items").fetchall()])
                 # print("@@@@@@@@@@")
 
             # print(f"success")
@@ -185,10 +214,12 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 
 
 def mainProg():
-    dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_9_bin.db"
+    dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_14_bin.db"
+    # dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_16_bin.db"
     # dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
     # dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
-    dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/EB_databaseVEC_9.db"
+    dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/EB_databaseVEC_14.db"
+    # dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/EB_databaseVEC_16.db"
 
     try:
         _createTable(dbVECTOR, 10)
@@ -196,7 +227,7 @@ def mainProg():
         untouch(dbVECTOR,100)
         _createTable(dbVECTOR, 10)
 
-    hardLimiter = 5000;
+    hardLimiter = 549561;
     #check length of table
 
     insert_kwargs = {
