@@ -74,22 +74,21 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
             sqlite_vec.load(db)
             db.enable_load_extension(False)
             cursor_s.row_factory = sqlite3.Row
-            # params = (name,)
             cursor_s.execute("SELECT key_id, hist_rel, numpyarr FROM imag LIMIT ? OFFSET ?", (limit,offset))
+            ### for bin16
+            # cursor_s.execute("SELECT key_id, hist_rel, numpyarr, epigenomicFactors, motifDirection FROM imag LIMIT ? OFFSET ?", (limit,offset))
             row_ids = []
             reply = []
             for en in cursor_s.fetchall():
-                # if len(en[1])!=16900:
-                    # print(en[0])
-                    # continue
+
                 row_ids += [en[0]]
-                # barr = en[1]
-                # print(en[1])
+
                 rarr = b''
-                # harr = [x for x in en[1]]
-                # print(en[3], en[4])
+
                 harr = array.array('I', en[1])
                 barr = array.array('f', en[2])
+                ### for bin16
+                # earr = array.array('f', en[3])
 
                 for el in harr:
                     rarr += struct.pack('l', el)
@@ -100,83 +99,28 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                             rarr += struct.pack('f',barr[i+j])
                         elif 28<i<38 and 28<j<38:
                             rarr += struct.pack('f',barr[i+j])
-                        # elif (i+j)%8==0:
-                        #     rarr += struct.pack('f',barr[i+j])
-                reply += [str(rarr)]
-                # exit()
 
-                # for el in barr:
+                ### for bin16
+                # for el in earr:
                 #     rarr += struct.pack('f', el)
 
 
-                # print(harr)
-                # print(barr)
-                # rarr = hex(harr) + hex(barr)
+                ### for bin16
+                # if en[4]!=":":
+                #     byteDir = bytes(en[4])
+                #     for zbyte in byteDir:
+                #         rarr += zbyte
 
-                # barr += en[8]  #this works fine.
-                # barr = en[9] #relative histogram
-                # barr += en[5]
+                
 
-                """
-                table schema:
-
-                imag(
-                    0:  key_id
-                    1:  name, 
-                    2:  dataset, 
-                    3:  condition, 
-                    4:  coordinates, 
-                    5:  numpyarr, 
-                    6:  viewing_vmax, 
-                    7:  dimensions, 
-                    8:  hic_path, 
-                    9:  PUB_ID, 
-                    10: resolution, 
-                    11: norm, 
-                    12: meta
-                    )
-                """
+                reply += [str(rarr)]
 
 
-                """
-                plan is change table...
-
-                imag(
-                    0:  key_id
-                    1:  name, 
-                    2:  dataset, 
-                    3:  condition, 
-                    4:  coordinates, 
-                    5:  numpyarr, 
-                    6*  greyscale256bitcolorHistogram (blob),
-                    6:  viewing_vmax, 
-                    7:  dimensions, 
-                    8:  hic_path, 
-                    9:  PUB_ID, 
-                    10: resolution, 
-                    11: norm, 
-                    12: meta
-                    )
-
-
-                and then concat. first 6*, then 5, then 10.
-                reply += [str(en[6].extend(en[5]).extend(en[10])]
-
-                """
-
-            # print(len(reply[0]))
             response = ollama.embed(model='8KWin', input=reply, truncate=False, options={'num_gpus': 99})
-            # print(reply)
-            # response = ollama.embed(model='llama3.2', input=reply, truncate=False, options={'num_gpus': 99, 'ctx_num': 18096})
             # response = ollama.embed(model='llama3.2', input=reply)
-            # print(response.embeddings)
 
             for idx,embd in enumerate(response.embeddings):
-                # print(embd[0:256])
                 db.execute("INSERT INTO vec_items(key_id, embedding) VALUES (?, ?)", [row_ids[idx], serialize_f32(embd[0:512])],)
-                # print([x for x in db.execute("SELECT * from vec_items").fetchall()])
-                # print("@@@@@@@@@@")
-
             # print(f"success")
 
 
@@ -190,7 +134,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
                 if len(reply[x])!=16900:
                     print(row_ids[x])
                     continue    
-                # db.execute("INSERT INTO vec_items(rowid, embedding) VALUES (?, ?)", [row_ids[x], reply[x][:1024]],)
+
 
             template = "An exception of type {0} occurred. Arguments:\n{1!r}"
             message = template.format(type(e).__name__, e.args)
@@ -216,8 +160,7 @@ def _readSOURCE_writeVECTOR(dbPATH1, dbPATH2,timeout,**kwargs):
 def mainProg():
     dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_14_bin.db"
     # dbSOURCE = "/Users/sean/Documents/Master/2025/Feb2025/sourceTables/database_16_bin.db"
-    # dbSOURCE = "/Users/seanmoran/Documents/Master/2024/Dec2024/databaseDUMP/databse6_binary.db";
-    # dbVECTOR = "/Users/seanmoran/Documents/Master/2025/Feb2025/vectorPilot/EB_databaseVEC.db"
+
     dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/EB_databaseVEC_14.db"
     # dbVECTOR = "/Users/sean/Documents/Master/2025/Feb2025/embeddedLoops/EB_databaseVEC_16.db"
 
@@ -249,13 +192,8 @@ if __name__ == "__main__":
     now = datetime.datetime.now()
     mainProg();
     print(datetime.datetime.now() - now)
-#     timeit.timeit(setup='''import sqlite3
-# import sqlite_vec
-# # from ollama import embed
-# import ollama
-# from typing import List
-# import struct
-# import timeit''', stmt=mainProg, number=1);
+
+
 
 
 
