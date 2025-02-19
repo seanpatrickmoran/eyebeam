@@ -1,0 +1,104 @@
+read SQLite table rows, embed, time ollama embedding.
+
+binary image only
+llama3.2:3B
+
+M2Ultra 64VRAM
+warmup ~5 minutes
+Result
+
+row/embed-batch:	Total time:			Rows/Second:	Seconds/Row:	est~34K~Rows		est 240K Rows
+----------------------------------------------------------------------------------------------------------
+1 		r/eb:  		1.609 	seconds		0.621 R/s		1.609	s/R 	15.191 	HRS 		107.3	HRS
+2 		r/eb:  		3.247	seconds		0.615 R/s		1.623	s/R 	15.336 	HRS 		108.2 	HRS
+4 		r/eb:  		5.339	seconds		0.749 R/s		1.335	s/R		12.607 	HRS 		89.00	HRS
+8^ 		r/eb:  		10.574	seconds		0.756 R/s		1.322	s/R		12.483 	HRS 		88.10	HRS
+12		r/eb:		16.070	seconds		0.746 R/s		1.339	s/R		12.648 	HRS 		89.26	HRS
+16		r/eb:		21.862	seconds		0.731 R/s		1.366	s/R		12.905 	HRS 		91.06 	HRS
+32		r/eb:		44.937	seconds		0.712 R/s		1.404	s/R		13.263 	HRS 		93.60 	HRS
+
+128		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+256		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+512		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+1024	r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+----------------------------------------------------------------------------------------------------------
+5  		r/eb:  		6.773	seconds		0.736 R/s		1.357	s/R		12.821 	HRS
+10		r/eb:		13.667	seconds		0.731 R/s		1.366	s/R		12.901 	HRS
+25		r/eb:		35.292	seconds		0.708 R/s		1.412	s/R		13.332 	HRS
+50		r/eb: 		71.51 	seconds		0.704 R/s		1.430	s/R		13.505 	HRS
+75		r/eb:		105.18	seconds		0.713 R/s		1.402	s/R		xxx
+100		r/eb:		141.54	seconds		0.706 R/s		1.415	s/R		xxx
+125		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+
+250		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+500		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+1000	r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+
+8-batch
+START: 12:02:33.469082
+END: 
+
+
+if 1000 took 35 minutes, 34K will take 1,190 minutes (19.8 hours),
+and 210K will take 122.5 hours (5.1 days). good enough.
+
+it's possible the display fell asleep. one moment.
+
+0:00:11.610252 2025-02-12 12:50:27.514661
+{'limit': 8, 'offset': 1504}
+0:00:11.911815 2025-02-12 12:50:39.426606
+{'limit': 8, 'offset': 1512}
+0:00:10.307050 2025-02-12 12:50:49.733780
+{'limit': 8, 'offset': 1520}
+0:00:10.312286 2025-02-12 12:51:00.046201
+{'limit': 8, 'offset': 1528}
+0:00:11.006248 2025-02-12 12:51:11.052549
+{'limit': 8, 'offset': 1536}
+0:00:10.857268 2025-02-12 12:51:21.909902
+{'limit': 8, 'offset': 1544}
+0:00:10.434944 2025-02-12 12:51:32.344919
+{'limit': 8, 'offset': 1552}
+
+
+that's 48 rows in 1 minute and 5 seconds, or 0.738 R/S. Still worse than my estimate.
+
+let's calculate this again. 240K rows * 65/48 sec/row * 1 hr/3600 sec = 90.28 hours. about 3.76 days.
+
+GO and count the number of rows in our proposed dataset. hopefully you can embed it in less than a week
+
+ 240K rows * 
+
+
+
+
+
+#about 34K rows. estimated 
+
+exo -- M2Ultra VRAM=64G -- M1 VRAM=16G
+
+row/embed-batch:	Total time:			Rows/Second:	Seconds/Row:	Estimated~34K~Rows
+------------------------------------------------------------------------------------------
+1 		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+2 		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+4 		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+8^ 		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+12		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+16		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+32		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+
+128		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+256		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+512		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+1024	r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+------------------------------------------------------------------------------------------
+5  		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+10		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+25		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+50		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+75		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+100		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+125		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+
+250		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+500		r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
+1000	r/eb:		xxxxx	seconds		xxxxx R/s		xxxxx	s/R		xxxxxx 	HRS
